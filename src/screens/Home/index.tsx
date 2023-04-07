@@ -19,9 +19,6 @@ export default function Home() {
       justifyContent="space-between"
     >
       <Box display="flex" alignItems="center" justifyContent="center" pt={20}>
-        {/* {weatherContext.weatherCurrent !== null ? (
-          
-        ) : null} */}
         <WeatherCurrentCard weather={weatherContext.weatherCurrent} />
       </Box>
       <Box pb={2}>

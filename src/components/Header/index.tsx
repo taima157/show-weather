@@ -12,39 +12,18 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { propHeader, propStack } from "../../types/routes";
 import { useContext, useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { City } from "../../types/city";
 import { WeatherContext } from "../../context/weather";
 
 export default function Header(props: propHeader) {
   const theme = useColorModeValue("Light", "Dark");
   const { toggleColorMode } = useColorMode();
-  const [cityName, setCityName] = useState<string | null>(null);
   const weather = useContext(WeatherContext);
 
   const navigation = useNavigation<propStack>();
 
-  useEffect(() => {
-    async function getLocalCitys() {
-      try {
-        const localCitys = await AsyncStorage.getItem("citys");
-
-        if (localCitys !== null) {
-          const citys: City[] = JSON.parse(localCitys);
-
-          citys.forEach((city) => {
-            if (city.selected) {
-              setCityName(city.name);
-            }
-          });
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    }
-
-    getLocalCitys();
-  }, []);
+  if (props.route.name === "Settings") {
+    return <Box></Box>;
+  }
 
   return (
     <Box
@@ -71,7 +50,7 @@ export default function Header(props: propHeader) {
           variant="ghost"
           p={0}
           m={0}
-          onPress={toggleColorMode}
+          onPress={() => navigation.navigate("Settings")}
         >
           <Icon
             as={<Octicons name="gear" />}
@@ -140,7 +119,10 @@ export default function Header(props: propHeader) {
         </Box>
       ) : null}
 
-      <StatusBar backgroundColor={theme === "Light" ? "#f8fafc" : "#131313"} />
+      <StatusBar
+        backgroundColor={theme === "Light" ? "#f8fafc" : "#131313"}
+        barStyle={theme === "Light" ? "dark-content" : "light-content"}
+      />
     </Box>
   );
 }

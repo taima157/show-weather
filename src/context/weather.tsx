@@ -42,7 +42,7 @@ export function WeatherProvider({ children }: ProviderProps) {
 
       citys.forEach((city) => {
         if (city.name === cityParam.name) {
-          throw new Error("Essa cidade já está adicionada.");
+          throw new Error("This city is already added.");
         }
       });
 
@@ -91,9 +91,11 @@ export function WeatherProvider({ children }: ProviderProps) {
     }
   }
 
-  function choiceCity(city: City) {
-    getWeatherCurrent(city);
+  async function choiceCity(city: City) {
     navigation.navigate("Home");
+    const date = await getWeatherCurrent(city);
+    await getWeatherHourlyForecast(city, date);
+    await getWeatherDaysForecast(city);
   }
 
   async function getWeatherCurrent(city: City) {
@@ -102,8 +104,38 @@ export function WeatherProvider({ children }: ProviderProps) {
         `/report?products=observation&q=${city.name}&lang=en-US&oneObservation=true&apiKey=${API_KEY}`
       );
 
-      console.log(response);
       setWeatherCurrent(response.data.places[0].observations[0]);
+      return response.data.places[0].observations[0].time;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function getWeatherHourlyForecast(city: City, date: string) {
+    try {
+      const dateFormat = date.split("T")[0];
+
+      const response = await weatherApi.get(
+        `/report?products=forecastHourly&q=${city.name}&lang=en-US&hourlyDate=${dateFormat}&apiKey=${API_KEY}`
+      );
+
+      setWeatherHourlyForecast(
+        response.data.places[0].hourlyForecasts[0].forecasts
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function getWeatherDaysForecast(city: City) {
+    try {
+      const response = await weatherApi.get(
+        `/report?products=forecast7daysSimple&q=${city.name}&lang=en-US&apiKey=${API_KEY}`
+      );
+
+      setWeatherDaysForecast(
+        response.data.places[0].dailyForecasts[0].forecasts
+      );
     } catch (error) {
       console.log(error);
     }
@@ -119,7 +151,7 @@ export function WeatherProvider({ children }: ProviderProps) {
 
           citys.forEach((city) => {
             if (city.selected) {
-              choiceCity(city);
+              changeCity(city);
             }
           });
         } else {

@@ -1,12 +1,6 @@
-import { StyleSheet, Text, View, SafeAreaView } from "react-native";
-import { WeatherProvider } from "./src/context/weather";
+import { SafeAreaView, useColorScheme } from "react-native";
 import { StackRoutes } from "./src/routes/stack";
-import {
-  NativeBaseProvider,
-  extendTheme,
-  StatusBar,
-  useColorModeValue,
-} from "native-base";
+import { NativeBaseProvider, extendTheme } from "native-base";
 import {
   useFonts,
   Poppins_400Regular,
@@ -14,9 +8,73 @@ import {
   Poppins_600SemiBold,
   Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
+import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Settings } from "./src/types/settings";
 
 export default function App() {
-  const text = useColorModeValue("Light", "Dark");
+  const [intialTheme, setInitialTheme] = useState<string | null>(null);
+  const deviceTheme = useColorScheme();
+
+  async function setSettings() {
+    try {
+      const localSettings = await AsyncStorage.getItem("settings");
+
+      if (localSettings === null) {
+        const settings: Settings = {
+          aparence: [
+            {
+              mode: "light",
+              selected: false,
+            },
+            {
+              mode: "dark",
+              selected: false,
+            },
+            {
+              mode: "device",
+              selected: true,
+            },
+          ],
+        };
+
+        await AsyncStorage.setItem("settings", JSON.stringify(settings));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function setTheme() {
+    try {
+      const localSettings = await AsyncStorage.getItem("settings");
+
+      if (localSettings !== null) {
+        const settings: Settings = JSON.parse(localSettings);
+
+        settings.aparence.map((mode) => {
+          if (mode.selected) {
+            if (mode.mode === "device") {
+              setInitialTheme(String(deviceTheme));
+
+              return;
+            }
+
+            setInitialTheme(mode.mode);
+          }
+        });
+      } else {
+        setInitialTheme(String(deviceTheme));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    setSettings();
+    setTheme();
+  }, []);
 
   let [fontsLoaded] = useFonts({
     Poppins_400Regular,
@@ -29,27 +87,25 @@ export default function App() {
     return null;
   }
 
+  if (intialTheme === null) return;
+
   const config = {
     useSystemColorMode: false,
-    initialColorMode: "dark",
+    initialColorMode: intialTheme,
   };
 
   const customTheme = extendTheme({ config });
 
-  console.log(text);
-
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: "#000",
+      }}
+    >
       <NativeBaseProvider theme={customTheme}>
         <StackRoutes />
       </NativeBaseProvider>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFF",
-  },
-});

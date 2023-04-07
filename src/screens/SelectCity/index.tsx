@@ -11,7 +11,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export default function SelectCity() {
   const [citys, setCitys] = useState<City[] | null>(null);
   const navigation = useNavigation<propStack>();
-  const [updateList, setUpdateList] = useState(false);
   const [localCitysCount, setLocalCityCount] = useState<number>(0);
 
   const [modal, setModal] = useState(false);
@@ -20,19 +19,19 @@ export default function SelectCity() {
     setModal(!modal);
   }
 
-  useEffect(() => {
-    async function getLocalCitys() {
-      const localCitys = await AsyncStorage.getItem("citys");
+  async function getLocalCitys() {
+    const localCitys = await AsyncStorage.getItem("citys");
 
-      if (localCitys !== null) {
-        let citys: City[] = JSON.parse(localCitys);
-        setLocalCityCount(citys.length);
-        setCitys(citys);
-      }
+    if (localCitys !== null) {
+      let citys: City[] = JSON.parse(localCitys);
+      setLocalCityCount(citys.length);
+      setCitys(citys);
     }
+  }
 
+  useEffect(() => {
     getLocalCitys();
-  }, [updateList]);
+  }, []);
 
   return (
     <Box
@@ -108,11 +107,7 @@ export default function SelectCity() {
           <ScrollView w="full">
             {citys?.map((city, index) => {
               return (
-                <CityCard
-                  key={index}
-                  city={city}
-                  updateList={() => setUpdateList(!updateList)}
-                />
+                <CityCard key={index} city={city} updateList={getLocalCitys} />
               );
             })}
           </ScrollView>
@@ -121,7 +116,7 @@ export default function SelectCity() {
       <ModalAddCity
         isVisible={modal}
         toggleModal={toggleModal}
-        updateList={() => setUpdateList(!updateList)}
+        updateList={getLocalCitys}
       />
     </Box>
   );

@@ -14,7 +14,7 @@ import { WeatherContext } from "../../context/weather";
 
 type PropsType = {
   city: City | null;
-  updateList: () => void;
+  updateList: () => Promise<void>;
 };
 
 export default function CityCard({ city, updateList }: PropsType) {
@@ -30,7 +30,7 @@ export default function CityCard({ city, updateList }: PropsType) {
     setLoading(true);
     await weatherContext?.removeCity(city);
     setLoading(false);
-    updateList();
+    await updateList();
   }
 
   async function handleChangeCity() {
@@ -43,7 +43,6 @@ export default function CityCard({ city, updateList }: PropsType) {
   useEffect(() => {
     async function getCurrentWeather() {
       try {
-        console.log("teste");
         const response = await weatherApi.get(
           `/report?products=observation&q=${city?.name}&lang=en-US&oneObservation=true&apiKey=${API_KEY}`
         );

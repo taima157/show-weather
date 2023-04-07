@@ -2,6 +2,8 @@ import { Box, Image, Text, Icon, Button } from "native-base";
 import { WeatherCurrent } from "../../types/weather";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { propStack } from "../../types/routes";
 
 type Props = {
   weather: WeatherCurrent | null;
@@ -35,11 +37,13 @@ const months = [
 export default function WeatherCurrentCard({ weather }: Props) {
   if (weather === null) return <Box></Box>;
 
+  const navigation = useNavigation<propStack>();
+
   const week = new Date(weather.time).getUTCDay();
   const month = new Date(weather.time).getMonth();
 
   const date = {
-    day: new Date(weather.time).getDay(),
+    day: new Date(weather.time).getUTCDate(),
     week: weeks[week],
     month: months[month],
     year: new Date(weather.time).getFullYear(),
@@ -141,7 +145,10 @@ export default function WeatherCurrentCard({ weather }: Props) {
         </Box>
       </Box>
 
-      <TouchableOpacity style={{ width: "90%" }}>
+      <TouchableOpacity
+        style={{ width: "90%" }}
+        onPress={() => navigation.navigate("DetailForecast")}
+      >
         <Text
           textAlign="right"
           mt={5}

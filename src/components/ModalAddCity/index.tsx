@@ -10,7 +10,7 @@ import { City } from "../../types/city";
 type PropsType = {
   isVisible: boolean;
   toggleModal: () => void;
-  updateList: () => void;
+  updateList: () => Promise<void>;
 };
 
 export default function ModalAddCity({
@@ -21,18 +21,27 @@ export default function ModalAddCity({
   const weather = useContext(WeatherContext);
   const [cityValue, setCityValue] = useState<string>("");
   const [request, setRequest] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
   function handleClose() {
     setCityValue("");
+    setError("")
     toggleModal();
   }
 
   async function handleAddCity() {
     setRequest(true);
+    setCityValue("");
+    setError("")
+
     try {
       const response = await geoApi.get(
         `geocode?q=${cityValue}&lang=en&apiKey=${API_KEY}`
       );
+
+      if (response.data.items.length === 0) {
+        throw new Error("City not found");
+      }
 
       const requestCity: GeoCity = await response.data.items[0];
       const city: City = {
@@ -46,12 +55,16 @@ export default function ModalAddCity({
 
       await weather?.addCity(city);
 
-      updateList();
-      handleClose();
+      await updateList();
       setRequest(false);
-    } catch (error) {
+      toggleModal();
+    } catch (error: any) {
       setRequest(false);
-      console.log(error);
+      if (error.message) {
+        setError(error.message);
+      } else {
+        setError("Unable to add city");
+      }
     }
   }
 
@@ -69,23 +82,18 @@ export default function ModalAddCity({
           <Input
             value={cityValue}
             onChangeText={(e) => setCityValue(e)}
-            my={5}
+            mt={5}
             placeholder="Ex..: Tokyo"
             fontFamily="Poppins_400Regular"
             fontSize={14}
+            isDisabled={request}
           />
         </Box>
+        <Text fontFamily="Poppins_400Regular" textAlign="center" my={4}>{error}</Text>
         <Box display="flex" flexDirection="row" justifyContent="space-between">
           <Button
             onPress={handleClose}
-            _dark={{
-              bgColor: "#0E0E0E",
-              borderColor: "#1C1C1C",
-            }}
-            _light={{
-              bgColor: "#DEDEDEDE",
-              borderColor: "#C5C5C5",
-            }}
+            variant="outline"
             borderWidth={1}
             w="45%"
             isDisabled={request}
