@@ -11,14 +11,16 @@ import { Octicons } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { propHeader, propStack } from "../../types/routes";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { City } from "../../types/city";
+import { WeatherContext } from "../../context/weather";
 
 export default function Header(props: propHeader) {
   const theme = useColorModeValue("Light", "Dark");
   const { toggleColorMode } = useColorMode();
   const [cityName, setCityName] = useState<string | null>(null);
+  const weather = useContext(WeatherContext);
 
   const navigation = useNavigation<propStack>();
 
@@ -62,8 +64,10 @@ export default function Header(props: propHeader) {
           Show Weather
         </Text>
         <Button
-          bg="transparent"
-          _pressed={{ bg: "tranparent" }}
+          bgColor="transparent"
+          _pressed={{
+            opacity: 0.5,
+          }}
           variant="ghost"
           p={0}
           m={0}
@@ -87,19 +91,28 @@ export default function Header(props: propHeader) {
           pt={5}
         >
           <Button
-            p={1}
+            py={1}
+            px={2}
             m={0}
-            pr={20}
             _dark={{
               bgColor: "#1C1C1C",
             }}
             _light={{
               bgColor: "#eeeeeeee",
             }}
+            _pressed={{
+              opacity: 0.5,
+            }}
             variant="ghost"
             onPress={() => navigation.navigate("Home")}
+            w="65%"
+            justifyContent="flex-start"
           >
-            <Text fontFamily="Poppins_500Medium">{cityName}</Text>
+            <Text fontFamily="Poppins_500Medium" textAlign="left" w="full">
+              {weather?.weatherCurrent?.place.address.city !== undefined
+                ? weather?.weatherCurrent?.place.address.city
+                : weather?.weatherCurrent?.place.address.state}
+            </Text>
             <Text
               fontFamily="Poppins_400Regular"
               fontSize={10}
@@ -109,9 +122,11 @@ export default function Header(props: propHeader) {
             </Text>
           </Button>
           <Button
-            bg="transparent"
+            bgColor="transparent"
             variant="ghost"
-            _pressed={{ bg: "tranparent" }}
+            _pressed={{
+              opacity: 0.5,
+            }}
             p={0}
             m={0}
             onPress={() => navigation.navigate("SelectCity")}

@@ -10,6 +10,8 @@ import { City } from "../types/city";
 import { weatherApi } from "../services/api";
 import { API_KEY } from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+import { propStack } from "../types/routes";
 
 type ProviderProps = {
   children: string | JSX.Element | JSX.Element[];
@@ -30,7 +32,7 @@ export function WeatherProvider({ children }: ProviderProps) {
     WeatherDaysForecast[] | null
   >(null);
 
-
+  const navigation = useNavigation<propStack>();
 
   async function addCity(cityParam: City) {
     const localCitys = await AsyncStorage.getItem("citys");
@@ -40,7 +42,7 @@ export function WeatherProvider({ children }: ProviderProps) {
 
       citys.forEach((city) => {
         if (city.name === cityParam.name) {
-          throw new Error("Essa cidade já está adicionanda.");
+          throw new Error("Essa cidade já está adicionada.");
         }
       });
 
@@ -90,13 +92,14 @@ export function WeatherProvider({ children }: ProviderProps) {
   }
 
   function choiceCity(city: City) {
-    getWeatherCurrent(city.location);
+    getWeatherCurrent(city);
+    navigation.navigate("Home");
   }
 
-  async function getWeatherCurrent({ lat, lng }: GeoProps) {
+  async function getWeatherCurrent(city: City) {
     try {
       const response = await weatherApi.get(
-        `/report?products=observation&location=${lat},${lng}&oneObservation=true&apiKey=${API_KEY}`
+        `/report?products=observation&q=${city.name}&lang=en-US&oneObservation=true&apiKey=${API_KEY}`
       );
 
       console.log(response);
@@ -122,10 +125,10 @@ export function WeatherProvider({ children }: ProviderProps) {
         } else {
           const citys: City[] = [
             {
-              name: "São Paulo",
+              name: "Sao Paulo",
               location: {
-                lat: -22,
-                lng: -49,
+                lat: -23.56287,
+                lng: -46.65468,
               },
               selected: true,
             },

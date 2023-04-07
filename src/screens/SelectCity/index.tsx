@@ -3,9 +3,36 @@ import { propStack } from "../../types/routes";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import CityCard from "../../components/CityCard";
+import ModalAddCity from "../../components/ModalAddCity";
+import { useEffect, useState } from "react";
+import { City } from "../../types/city";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function SelectCity() {
+  const [citys, setCitys] = useState<City[] | null>(null);
   const navigation = useNavigation<propStack>();
+  const [updateList, setUpdateList] = useState(false);
+  const [localCitysCount, setLocalCityCount] = useState<number>(0);
+
+  const [modal, setModal] = useState(false);
+
+  function toggleModal() {
+    setModal(!modal);
+  }
+
+  useEffect(() => {
+    async function getLocalCitys() {
+      const localCitys = await AsyncStorage.getItem("citys");
+
+      if (localCitys !== null) {
+        let citys: City[] = JSON.parse(localCitys);
+        setLocalCityCount(citys.length);
+        setCitys(citys);
+      }
+    }
+
+    getLocalCitys();
+  }, [updateList]);
 
   return (
     <Box
@@ -33,6 +60,9 @@ export default function SelectCity() {
               bgColor: "#eeeeeeee",
             }}
             variant="ghost"
+            _pressed={{
+              opacity: 0.5,
+            }}
             onPress={() => navigation.goBack()}
           >
             <Icon
@@ -45,35 +75,54 @@ export default function SelectCity() {
             Select City
           </Text>
         </Box>
-        <Button
-          bg="transparent"
-          variant="ghost"
-          _pressed={{ bg: "tranparent" }}
-          p={0}
-          m={0}
-          _dark={{
-            bgColor: "#1C1C1C",
-          }}
-          _light={{
-            bgColor: "#eeeeeeee",
-          }}
-          onPress={() => navigation.navigate("SelectCity")}
-        >
-          <Icon
-            as={<MaterialCommunityIcons name="plus" />}
-            size={8}
-            _dark={{ color: "#A4A4A4" }}
-          />
-        </Button>
+        <Box display="flex" flexDirection="row" alignItems="center">
+          <Text fontFamily="Poppins_600SemiBold" pr={3} color="#A4A4A4">
+            (Max: 5)
+          </Text>
+          <Button
+            p={0}
+            m={0}
+            _dark={{
+              bgColor: "#1C1C1C",
+            }}
+            _light={{
+              bgColor: "#eeeeeeee",
+            }}
+            _pressed={{
+              opacity: 0.5,
+            }}
+            onPress={toggleModal}
+            isDisabled={localCitysCount >= 5}
+          >
+            <Icon
+              as={<MaterialCommunityIcons name="plus" />}
+              size={8}
+              _dark={{ color: "#A4A4A4" }}
+            />
+          </Button>
+        </Box>
       </Box>
 
       <Box w="full" pt={10}>
-        <ScrollView>
-          <CityCard city={null} />
-          <CityCard city={null} />
-          <CityCard city={null} />
-        </ScrollView>
+        {citys !== null ? (
+          <ScrollView w="full">
+            {citys?.map((city, index) => {
+              return (
+                <CityCard
+                  key={index}
+                  city={city}
+                  updateList={() => setUpdateList(!updateList)}
+                />
+              );
+            })}
+          </ScrollView>
+        ) : null}
       </Box>
+      <ModalAddCity
+        isVisible={modal}
+        toggleModal={toggleModal}
+        updateList={() => setUpdateList(!updateList)}
+      />
     </Box>
   );
 }

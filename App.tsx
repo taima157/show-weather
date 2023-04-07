@@ -41,9 +41,7 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <NativeBaseProvider theme={customTheme}>
-        <WeatherProvider>
-          <StackRoutes />
-        </WeatherProvider>
+        <StackRoutes />
       </NativeBaseProvider>
     </SafeAreaView>
   );

@@ -110,7 +110,7 @@ export type WeatherContextTypes = {
   weatherHourlyForecast: WeatherHourlyForecast[] | null;
   weatherDaysForecast: WeatherDaysForecast[] | null;
   choiceCity: (city: City) => void;
-  changeCity: (city: City) => void;
-  removeCity: (city: City) => void;
-  addCity: (city: City) => void;
+  changeCity: (city: City) => Promise<void>;
+  removeCity: (city: City) => Promise<void>;
+  addCity: (city: City) => Promise<void>;
 };
