@@ -69,6 +69,8 @@ export function WeatherProvider({ children }: ProviderProps) {
   }
 
   async function changeCity(cityParam: City) {
+    choiceCity(cityParam);
+    
     const localCitys = await AsyncStorage.getItem("citys");
 
     if (localCitys !== null) {
@@ -87,11 +89,13 @@ export function WeatherProvider({ children }: ProviderProps) {
       });
 
       await AsyncStorage.setItem("citys", JSON.stringify(newCitys));
-      choiceCity(cityParam);
     }
   }
 
   async function choiceCity(city: City) {
+    setWeatherCurrent(null);
+    setWeatherDaysForecast(null);
+    setWeatherHourlyForecast(null);
     navigation.navigate("Home");
     const date = await getWeatherCurrent(city);
     await getWeatherHourlyForecast(city, date);

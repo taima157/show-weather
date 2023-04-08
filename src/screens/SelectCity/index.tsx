@@ -7,6 +7,7 @@ import ModalAddCity from "../../components/ModalAddCity";
 import { useEffect, useState } from "react";
 import { City } from "../../types/city";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { ActivityIndicator } from "react-native";
 
 export default function SelectCity() {
   const [citys, setCitys] = useState<City[] | null>(null);
@@ -20,6 +21,7 @@ export default function SelectCity() {
   }
 
   async function getLocalCitys() {
+    setCitys(null);
     const localCitys = await AsyncStorage.getItem("citys");
 
     if (localCitys !== null) {
@@ -102,7 +104,7 @@ export default function SelectCity() {
         </Box>
       </Box>
 
-      <Box w="full" pt={10}>
+      <Box w="full" pt={10} flex={1}>
         {citys !== null ? (
           <ScrollView w="full">
             {citys?.map((city, index) => {
@@ -111,7 +113,11 @@ export default function SelectCity() {
               );
             })}
           </ScrollView>
-        ) : null}
+        ) : (
+          <Box flex={1} alignItems="center" justifyContent="center">
+            <ActivityIndicator size="large" />
+          </Box>
+        )}
       </Box>
       <ModalAddCity
         isVisible={modal}

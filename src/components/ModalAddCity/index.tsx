@@ -25,14 +25,14 @@ export default function ModalAddCity({
 
   function handleClose() {
     setCityValue("");
-    setError("")
+    setError("");
     toggleModal();
   }
 
   async function handleAddCity() {
     setRequest(true);
     setCityValue("");
-    setError("")
+    setError("");
 
     try {
       const response = await geoApi.get(
@@ -55,9 +55,9 @@ export default function ModalAddCity({
 
       await weather?.addCity(city);
 
-      await updateList();
       setRequest(false);
       toggleModal();
+      await updateList();
     } catch (error: any) {
       setRequest(false);
       if (error.message) {
@@ -87,9 +87,13 @@ export default function ModalAddCity({
             fontFamily="Poppins_400Regular"
             fontSize={14}
             isDisabled={request}
+            returnKeyType="go"
+            onSubmitEditing={handleAddCity}
           />
         </Box>
-        <Text fontFamily="Poppins_400Regular" textAlign="center" my={4}>{error}</Text>
+        <Text fontFamily="Poppins_400Regular" textAlign="center" my={4}>
+          {error}
+        </Text>
         <Box display="flex" flexDirection="row" justifyContent="space-between">
           <Button
             onPress={handleClose}

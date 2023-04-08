@@ -118,13 +118,15 @@ export default function Settings() {
       </Box>
 
       <Box flex={1} justifyContent="space-between">
-        <Box p={5} mt={5}>
+        <Box mt={5} >
           <Box>
-            <Text fontFamily="Poppins_500Medium" fontSize={16}>
-              Aparence:
-            </Text>
+            <Box _dark={{ bgColor: "#131313" }} _light={{ bgColor: "#f8fafc" }} py={2}>
+              <Text fontFamily="Poppins_500Medium" fontSize={16} px={5}>
+                Aparence:
+              </Text>
+            </Box>
             {settings !== null && (
-              <Box mt={4}>
+              <Box mt={4} px={5}>
                 {settings.aparence.map((mode, index) => {
                   return (
                     <TouchableOpacity
